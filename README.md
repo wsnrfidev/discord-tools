@@ -8,6 +8,7 @@ and finally you can also do server monitoring on your discord server via a bot j
 
 For a tutorial on making bot tokens and webhooks, you can see it on YouTube, it's very easy
 
+This project is open source for educational and fun purposes only, you can edit, add features, and improve this project.
 
 # Preview
 
