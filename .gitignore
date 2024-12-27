@@ -1,0 +1,43 @@
+## Ignore the Visual Studio temporary files, directories, and files
+.vs/
+.vscode/
+.idea/
+
+## User-specific files
+user.config
+userosscache/
+
+## Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+## Windows Installer files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Windows Installer files
+[Dd]ebug/
+[Dd]ebugPublic/
+[Dd]istro/
+[Dd]ebugBin/
+
+# Windows Installer files
+obj/
+bin/
+
+# Uncomment if you have tasks that create project's project's configuration files
+# .vs2019/
+# .vs2019/
+# .vs2019/
+# files from .cache
+# .vs2017/
+
+# Windows Installer file ending ##
+!.wixproj
+.debug/
+.autotasks.ex3 tools would-cancel##
+.direct
