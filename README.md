@@ -25,6 +25,8 @@ This project is open source for educational and fun purposes only, you can edit,
 # New Update
 
 - Allowed Mention Feature
+- Fixed Output Server Info
+- Fixed Output Monitoring Server
 
 How To Mention : 
 
