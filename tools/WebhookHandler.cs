@@ -17,7 +17,7 @@ namespace DiscordTools
 
             Console.WriteLine("\n\t\t\t\t 0. Return to main menu");
 
-            Console.Write("\n\t\t\t\t Webhook URL (or 0 ro return): ");
+            Console.Write("\n\t\t\t\t Webhook URL (or 0 to return): ");
             string webhook = Console.ReadLine();
 
             if (webhook == "0")
@@ -69,7 +69,7 @@ namespace DiscordTools
                 string title = Console.ReadLine();
                 Console.Write("\n\t\t\t\t Embed Description: ");
                 string description = Console.ReadLine();
-                Console.Write("\n\t\t\t\t Embed Color (Hex format, e.g., #FF5733): ");
+                Console.Write("\n\t\t\t\t Embed Color (Hex format, e.g., #3498db): ");
                 string color = Console.ReadLine();
                 Console.Write("\n\t\t\t\t Thumbnail Image URL (optional): ");
                 string thumbnailUrl = Console.ReadLine();
@@ -101,7 +101,7 @@ namespace DiscordTools
                 string title = Console.ReadLine();
                 Console.Write("\n\t\t\t\t Embed Description: ");
                 string description = Console.ReadLine();
-                Console.Write("\n\t\t\t\t Embed Color (Hex format, e.g., #FF5733): ");
+                Console.Write("\n\t\t\t\t Embed Color (Hex format, e.g., #3498db): ");
                 string color = Console.ReadLine();
                 Console.Write("\n\t\t\t\t Thumbnail Image URL (optional): ");
                 string thumbnailUrl = Console.ReadLine();
@@ -113,7 +113,7 @@ namespace DiscordTools
                     Title = title,
                     Description = description,
                     Color = color,
-                    ImageUrl= imageUrl,
+                    ImageUrl = imageUrl,
                     ThumbnailUrl = thumbnailUrl,
                 };
             }
@@ -193,7 +193,7 @@ namespace DiscordTools
             Console.WriteLine($"\n\t\t\t\tTitle: {embed.Title}");
             Console.WriteLine($"\t\t\t\tDescription: {embed.Description}");
             Console.WriteLine($"\t\t\t\tColor: {embed.Color}");
-            Console.WriteLine($"\t\t\t\tThumbnail Image URL: {embed.ImageUrl ?? "None"}");
+            Console.WriteLine($"\t\t\t\tThumbnail Image URL: {embed.ThumbnailUrl ?? "None"}");
             Console.WriteLine($"\t\t\t\tImage URL: {embed.ImageUrl ?? "None"}");
             Console.ResetColor();
         }
@@ -214,14 +214,20 @@ namespace DiscordTools
             Console.WriteLine($"\t\t\t\tTitle: {embed.Title}");
             Console.WriteLine($"\t\t\t\tDescription: {embed.Description}");
             Console.WriteLine($"\t\t\t\tColor: {embed.Color}");
-            Console.WriteLine($"\t\t\t\tThumbnail Image URL: {embed.ImageUrl ?? "None"}");
+            Console.WriteLine($"\t\t\t\tThumbnail Image URL: {embed.ThumbnailUrl ?? "None"}");
             Console.WriteLine($"\t\t\t\tImage URL: {embed.ImageUrl ?? "None"}");
             Console.ResetColor();
         }
 
         private static async Task SendNormalMessage(string webhook, string message)
         {
-            string json = $"{{\"content\":\"{message}\"}}";
+            string json = $@"{{
+                ""content"": ""{message}"",
+                ""allowed_mentions"": {{
+                    ""parse"": [""users"", ""roles"", ""everyone""]
+                }}
+            }}";
+
             using (HttpClient client = new HttpClient())
             {
                 HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -244,10 +250,22 @@ namespace DiscordTools
 
         private static async Task SendEmbedMessage(string webhook, EmbedMessage embed)
         {
-            string colorHex = embed.Color.StartsWith("#") ? embed.Color.Substring(1) : embed.Color;
+            string colorHex = string.IsNullOrWhiteSpace(embed.Color) ? "3498db" :
+                   (embed.Color.StartsWith("#") ? embed.Color.Substring(1) : embed.Color);
             int color = int.Parse(colorHex, System.Globalization.NumberStyles.HexNumber);
 
-            string json = $"{{\"embeds\":[{{\"title\":\"{embed.Title}\",\"description\":\"{embed.Description}\",\"color\":{color},\"image\":{{\"url\":\"{embed.ImageUrl ?? ""}\"}},\"thumbnail\":{{\"url\":\"{embed.ThumbnailUrl ?? ""}\"}}}}]}}";
+            string json = $@"{{
+                ""embeds"": [{{
+                    ""title"": ""{embed.Title}"",
+                    ""description"": ""{embed.Description}"",
+                    ""color"": {color},
+                    ""image"": {{""url"": ""{embed.ImageUrl ?? ""}""}},
+                    ""thumbnail"": {{""url"": ""{embed.ThumbnailUrl ?? ""}""}}
+                }}],
+                ""allowed_mentions"": {{
+                    ""parse"": [""users"", ""roles"", ""everyone""]
+                }}
+            }}";
 
             using (HttpClient client = new HttpClient())
             {
@@ -267,16 +285,27 @@ namespace DiscordTools
                     Console.WriteLine($"\n\t\t\t\tFailed to send embed message. Status Code: {response.StatusCode}");
                 }
             }
-
         }
 
         private static async Task SendBothMessages(string webhook, string message, EmbedMessage embed)
         {
-            string colorHex = embed.Color.StartsWith("#") ? embed.Color.Substring(1) : embed.Color;
+            string colorHex = string.IsNullOrWhiteSpace(embed.Color) ? "3498db" :
+                  (embed.Color.StartsWith("#") ? embed.Color.Substring(1) : embed.Color);
             int color = int.Parse(colorHex, System.Globalization.NumberStyles.HexNumber);
 
-            string json = $"{{\"content\":\"{message}\",\"embeds\":[{{\"title\":\"{embed.Title}\",\"description\":\"{embed.Description}\",\"color\":{color},\"image\":{{\"url\":\"{embed.ImageUrl ?? ""}\"}},\"thumbnail\":{{\"url\":\"{embed.ThumbnailUrl ?? ""}\"}}}}]}}";
-
+            string json = $@"{{
+                ""content"": ""{message}"",
+                ""embeds"": [{{
+                    ""title"": ""{embed.Title}"",
+                    ""description"": ""{embed.Description}"",
+                    ""color"": {color},
+                    ""image"": {{""url"": ""{embed.ImageUrl ?? ""}""}},
+                    ""thumbnail"": {{""url"": ""{embed.ThumbnailUrl ?? ""}""}}
+                }}],
+                ""allowed_mentions"": {{
+                    ""parse"": [""users"", ""roles"", ""everyone""]
+                }}
+            }}";
 
             using (HttpClient client = new HttpClient())
             {

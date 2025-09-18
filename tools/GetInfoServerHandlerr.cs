@@ -65,23 +65,38 @@ namespace DiscordTools
                 await client.LoginAsync(TokenType.Bot, token);
                 await client.StartAsync();
 
-                await Task.Delay(2000);
-
-                if (client.ConnectionState != ConnectionState.Connected)
+                // Tunggu Ready agar guilds ter-register di client
+                var readyEvent = new TaskCompletionSource<bool>();
+                client.Ready += () =>
                 {
-                    Console.Clear();
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("\n\t\t\t\t[ERROR] Bot failed to connect. Invalid Bot Token.");
-                    Console.ResetColor();
-                    Console.WriteLine("\n\t\t\t\tPress any key to return to the menu...");
-                    Console.ReadKey();
-                    return;
-                }
+                    readyEvent.TrySetResult(true);
+                    return Task.CompletedTask;
+                };
+                await readyEvent.Task;
 
                 var server = client.GetGuild(serverId);
                 if (server != null)
                 {
-                    int botCount = server.Users.Count(u => u.IsBot);
+                    
+                    var allUsers = await server.GetUsersAsync().FlattenAsync();
+                    int botCount = allUsers.Count(u => u.IsBot);
+
+                    
+                    string ownerName;
+                    try
+                    {
+                        
+                        var restOwner = await client.Rest.GetGuildUserAsync(serverId, server.OwnerId);
+                        if (restOwner != null)
+                            ownerName = $"{restOwner.Username}#{restOwner.Discriminator}";
+                        else
+                            ownerName = $"Unknown (ID: {server.OwnerId})";
+                    }
+                    catch (Exception)
+                    {
+                        
+                        ownerName = $"Unknown (ID: {server.OwnerId})";
+                    }
 
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -97,7 +112,7 @@ namespace DiscordTools
                     Console.WriteLine($"\t\t\t\tTotal Roles: {server.Roles.Count()}");
                     Console.WriteLine($"\t\t\t\tTotal Channels: {server.Channels.Count}");
                     Console.WriteLine($"\t\t\t\tServer Region: {server.VoiceRegionId}");
-                    Console.WriteLine($"\t\t\t\tServer Owner: {server.Owner?.Username ?? "Unknown"} #{server.Owner?.Discriminator ?? "00000"}");
+                    Console.WriteLine($"\t\t\t\tServer Owner: {ownerName}");
                 }
                 else
                 {

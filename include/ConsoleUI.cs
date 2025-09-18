@@ -18,7 +18,7 @@ namespace DiscordTools
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("\n\n                  |------------------------------------------------------------------------------------|");
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("\n\n                  |      Version : 1.0.0 ---------------------------- discord tools - @wsnrfidev       |   ");
+            Console.WriteLine("\n\n                  |      Version : 2.0.0 ---------------------------- discord tools - @wsnrfidev       |   ");
             Console.ResetColor();
         }
 
