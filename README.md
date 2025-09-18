@@ -21,3 +21,14 @@ This project is open source for educational and fun purposes only, you can edit,
 # Preview
 
 ![IMG_20241227_203228](https://github.com/user-attachments/assets/c6db2cde-e5ac-46e9-ab28-4e57ae96ce9a)
+
+# New Update
+
+- Allowed Mention Feature
+
+How To Mention : 
+
+- User : <@UserID>
+- Role : <@&RoleID>
+- Channel: <#ChannelID>
+- Everyone/Here: @everyone, @here
