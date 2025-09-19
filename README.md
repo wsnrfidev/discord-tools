@@ -27,6 +27,8 @@ This project is open source for educational and fun purposes only, you can edit,
 - Allowed Mention Feature
 - Fixed Output Server Info
 - Fixed Output Monitoring Server
+- Update Webhook Message
+- Added Get Members Info
 
 How To Mention : 
 
