@@ -18,7 +18,7 @@ namespace DiscordTools
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("\n\n                  |------------------------------------------------------------------------------------|");
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("\n\n                  |      Version : 2.0.0 ---------------------------- discord tools - @wsnrfidev       |   ");
+            Console.WriteLine("\n\n                  |      Version : 2.2.1 ---------------------------- discord tools - @wsnrfidev       |   ");
             Console.ResetColor();
         }
 
@@ -30,7 +30,8 @@ namespace DiscordTools
             Console.WriteLine("\n\t\t\t                        2. Get Server Info");
             Console.WriteLine("\n\t\t\t                        3. Server Monitoring");
             Console.WriteLine("\n\t\t\t                        4. Get Members Info");
-            Console.WriteLine("\n\t\t\t                        5. Exit");
+            Console.WriteLine("\n\t\t\t                        5. Auto Add Role");
+            Console.WriteLine("\n\t\t\t                        0. Exit");
             Console.ResetColor();
         }
     }

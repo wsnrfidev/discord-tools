@@ -32,6 +32,9 @@ namespace DiscordTools
                         await GetMembersInfoHandler.GetMembersInfo();
                         break;
                     case '5':
+                        AutoAddRoleHandler.AutoAddRole();
+                        break;
+                    case '0':
                         return;
                     default:
                         Console.Clear();
