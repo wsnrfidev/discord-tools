@@ -29,6 +29,9 @@ namespace DiscordTools
                         await ServerMonitoringHandler.MonitorServer();
                         break;
                     case '4':
+                        await GetMembersInfoHandler.GetMembersInfo();
+                        break;
+                    case '5':
                         return;
                     default:
                         Console.Clear();

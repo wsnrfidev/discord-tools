@@ -65,7 +65,7 @@ namespace DiscordTools
                 await client.LoginAsync(TokenType.Bot, token);
                 await client.StartAsync();
 
-                // Tunggu Ready agar guilds ter-register di client
+                // wait till guild registered
                 var readyEvent = new TaskCompletionSource<bool>();
                 client.Ready += () =>
                 {
@@ -137,6 +137,6 @@ namespace DiscordTools
         {
             Console.WriteLine(log);
             return Task.CompletedTask;
-        }
+        } 
     }
 }

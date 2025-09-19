@@ -2,6 +2,8 @@
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Text.Json;
 
 namespace DiscordTools
 {
@@ -47,6 +49,7 @@ namespace DiscordTools
             EmbedMessage embed = null;
             bool isEmbedMessage = false;
 
+
             if (messageType == "1")
             {
                 Console.Clear();
@@ -54,21 +57,32 @@ namespace DiscordTools
                 Console.WriteLine("\t\t\t\t===============================================");
                 Console.WriteLine("\t\t\t\t        Send Normal Message");
                 Console.WriteLine("\t\t\t\t===============================================");
-                Console.Write("\n\t\t\t\t Message: ");
-                message = Console.ReadLine();
+                message = ReadMultilineInput("Message");
             }
-            else if (messageType == "2")
+            else if (messageType == "2" || messageType == "3")
             {
+                if (messageType == "3")
+                {
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("\t\t\t\t===============================================");
+                    Console.WriteLine("\t\t\t\t        Send Message with Embed");
+                    Console.WriteLine("\t\t\t\t===============================================");
+                    message = ReadMultilineInput("Message");
+                }
+                else
+                {
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("\t\t\t\t===============================================");
+                    Console.WriteLine("\t\t\t\t        Send Embed Message");
+                    Console.WriteLine("\t\t\t\t===============================================");
+                }
+
                 isEmbedMessage = true;
-                Console.Clear();
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("\t\t\t\t===============================================");
-                Console.WriteLine("\t\t\t\t        Send Embed Message");
-                Console.WriteLine("\t\t\t\t===============================================");
                 Console.Write("\n\t\t\t\t Embed Title: ");
                 string title = Console.ReadLine();
-                Console.Write("\n\t\t\t\t Embed Description: ");
-                string description = Console.ReadLine();
+                string description = ReadMultilineInput("Embed Description");
                 Console.Write("\n\t\t\t\t Embed Color (Hex format, e.g., #3498db): ");
                 string color = Console.ReadLine();
                 Console.Write("\n\t\t\t\t Thumbnail Image URL (optional): ");
@@ -84,38 +98,34 @@ namespace DiscordTools
                     ImageUrl = imageUrl,
                     ThumbnailUrl = thumbnailUrl,
                 };
-            }
-            else if (messageType == "3")
-            {
-                Console.Clear();
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("\t\t\t\t===============================================");
-                Console.WriteLine("\t\t\t\t        Send Message with Embed");
-                Console.WriteLine("\t\t\t\t===============================================");
 
-                Console.Write("\n\t\t\t\t Message: ");
-                message = Console.ReadLine();
-
-                isEmbedMessage = true;
-                Console.Write("\n\t\t\t\t Embed Title: ");
-                string title = Console.ReadLine();
-                Console.Write("\n\t\t\t\t Embed Description: ");
-                string description = Console.ReadLine();
-                Console.Write("\n\t\t\t\t Embed Color (Hex format, e.g., #3498db): ");
-                string color = Console.ReadLine();
-                Console.Write("\n\t\t\t\t Thumbnail Image URL (optional): ");
-                string thumbnailUrl = Console.ReadLine();
-                Console.Write("\n\t\t\t\t Embed Image URL (optional): ");
-                string imageUrl = Console.ReadLine();
-
-                embed = new EmbedMessage
+                // added fields
+                Console.Write("\n\t\t\t\t Do you want to add fields? (Y/N): ");
+                string addFields = Console.ReadLine().ToUpper();
+                while (addFields == "Y")
                 {
-                    Title = title,
-                    Description = description,
-                    Color = color,
-                    ImageUrl = imageUrl,
-                    ThumbnailUrl = thumbnailUrl,
-                };
+                    Console.Write("\n\t\t\t\t Field Name: ");
+                    string fieldName = Console.ReadLine();
+                    string fieldValue = ReadMultilineInput("Field Value");
+                    Console.Write("\t\t\t\t Inline? (Y/N): ");
+                    string inlineChoice = Console.ReadLine().ToUpper();
+
+                    embed.Fields.Add(new EmbedFields
+                    {
+                        Name = fieldName,
+                        Value = fieldValue,
+                        Inline = inlineChoice == "Y"
+                    });
+
+                    Console.Write("\n\t\t\t\t Add another field? (Y/N): ");
+                    addFields = Console.ReadLine().ToUpper();
+                }
+
+                // added footer
+                Console.Write("\n\t\t\t\t Footer Text (optional): ");
+                embed.FooterText = Console.ReadLine();
+                Console.Write("\t\t\t\t Footer Icon URL (optional): ");
+                embed.FooterIcon = Console.ReadLine();
             }
 
             Console.Write("\n\t\t\t\t Would you like to preview the message before sending? (Y/N): ");
@@ -125,15 +135,15 @@ namespace DiscordTools
             {
                 if (messageType == "3")
                 {
-                    await PreviewBothMessages(webhook, message, embed);
+                    await PreviewBothMessages(message, embed);
                 }
                 else if (isEmbedMessage)
                 {
-                    await PreviewEmbedMessage(webhook, embed);
+                    await PreviewEmbedMessage(embed);
                 }
                 else
                 {
-                    await PreviewNormalMessage(webhook, message);
+                    await PreviewNormalMessage(message);
                 }
             }
 
@@ -164,7 +174,34 @@ namespace DiscordTools
             }
         }
 
-        private static async Task PreviewNormalMessage(string webhook, string message)
+        // added multi line
+        private static string ReadMultilineInput(string prompt)
+        {
+            Console.WriteLine($"\n\t\t\t\t {prompt} (press ENTER twice to finish): ");
+            var sb = new StringBuilder();
+            string line;
+            bool lastLineEmpty = false;
+
+            while (true)
+            {
+                line = Console.ReadLine();
+                if (string.IsNullOrEmpty(line))
+                {
+                    if (lastLineEmpty) break; // hit enter twice -> done
+                    lastLineEmpty = true;
+                }
+                else
+                {
+                    sb.AppendLine(line);
+                    lastLineEmpty = false;
+                }
+            }
+
+            return sb.ToString().TrimEnd().Replace("\r\n", "\n");
+        }
+
+
+        private static async Task PreviewNormalMessage(string message)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -178,7 +215,7 @@ namespace DiscordTools
             Console.ResetColor();
         }
 
-        private static async Task PreviewEmbedMessage(string webhook, EmbedMessage embed)
+        private static async Task PreviewEmbedMessage(EmbedMessage embed)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -195,10 +232,26 @@ namespace DiscordTools
             Console.WriteLine($"\t\t\t\tColor: {embed.Color}");
             Console.WriteLine($"\t\t\t\tThumbnail Image URL: {embed.ThumbnailUrl ?? "None"}");
             Console.WriteLine($"\t\t\t\tImage URL: {embed.ImageUrl ?? "None"}");
+
+            if (embed.Fields.Any())
+            {
+                Console.WriteLine("\t\t\t\tFields:");
+                foreach (var field in embed.Fields)
+                {
+                    Console.WriteLine($"\t\t\t\t- {field.Name}: {field.Value} (Inline: {field.Inline})");
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(embed.FooterText))
+            {
+                Console.WriteLine($"\t\t\t\tFooter: {embed.FooterText}");
+                Console.WriteLine($"\t\t\t\tFooter Icon: {embed.FooterIcon ?? "None"}");
+            }
+
             Console.ResetColor();
         }
 
-        private static async Task PreviewBothMessages(string webhook, string message, EmbedMessage embed)
+        private static async Task PreviewBothMessages(string message, EmbedMessage embed)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -216,114 +269,135 @@ namespace DiscordTools
             Console.WriteLine($"\t\t\t\tColor: {embed.Color}");
             Console.WriteLine($"\t\t\t\tThumbnail Image URL: {embed.ThumbnailUrl ?? "None"}");
             Console.WriteLine($"\t\t\t\tImage URL: {embed.ImageUrl ?? "None"}");
+
+            if (embed.Fields.Any())
+            {
+                Console.WriteLine("\t\t\t\tFields:");
+                foreach (var field in embed.Fields)
+                {
+                    Console.WriteLine($"\t\t\t\t- {field.Name}: {field.Value} (Inline: {field.Inline})");
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(embed.FooterText))
+            {
+                Console.WriteLine($"\t\t\t\tFooter: {embed.FooterText}");
+                Console.WriteLine($"\t\t\t\tFooter Icon: {embed.FooterIcon ?? "None"}");
+            }
+
             Console.ResetColor();
         }
 
         private static async Task SendNormalMessage(string webhook, string message)
         {
-            string json = $@"{{
-                ""content"": ""{message}"",
-                ""allowed_mentions"": {{
-                    ""parse"": [""users"", ""roles"", ""everyone""]
-                }}
-            }}";
+            var payload = new
+            {
+                content = message,
+                allowed_mentions = new
+                {
+                    parse = new[] { "users", "roles", "everyone" }
+                }
+            };
+
+            string json = JsonSerializer.Serialize(payload);
 
             using (HttpClient client = new HttpClient())
             {
                 HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
                 HttpResponseMessage response = await client.PostAsync(webhook, content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    Console.Clear();
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("\n\t\t\t\tMessage sent successfully!");
-                }
-                else
-                {
-                    Console.Clear();
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"\n\t\t\t\tFailed to send message. Status Code: {response.StatusCode}");
-                }
+                PrintSendResult(response, "Message");
             }
         }
+
 
         private static async Task SendEmbedMessage(string webhook, EmbedMessage embed)
         {
             string colorHex = string.IsNullOrWhiteSpace(embed.Color) ? "3498db" :
-                   (embed.Color.StartsWith("#") ? embed.Color.Substring(1) : embed.Color);
+                (embed.Color.StartsWith("#") ? embed.Color.Substring(1) : embed.Color);
             int color = int.Parse(colorHex, System.Globalization.NumberStyles.HexNumber);
 
-            string json = $@"{{
-                ""embeds"": [{{
-                    ""title"": ""{embed.Title}"",
-                    ""description"": ""{embed.Description}"",
-                    ""color"": {color},
-                    ""image"": {{""url"": ""{embed.ImageUrl ?? ""}""}},
-                    ""thumbnail"": {{""url"": ""{embed.ThumbnailUrl ?? ""}""}}
-                }}],
-                ""allowed_mentions"": {{
-                    ""parse"": [""users"", ""roles"", ""everyone""]
-                }}
-            }}";
+            var embedObj = new
+            {
+                title = embed.Title,
+                description = embed.Description,
+                color = color,
+                image = string.IsNullOrWhiteSpace(embed.ImageUrl) ? null : new { url = embed.ImageUrl },
+                thumbnail = string.IsNullOrWhiteSpace(embed.ThumbnailUrl) ? null : new { url = embed.ThumbnailUrl },
+                fields = embed.Fields.Any()
+                    ? embed.Fields.Select(f => new { name = f.Name, value = f.Value, inline = f.Inline }).ToArray()
+                    : null,
+                footer = string.IsNullOrWhiteSpace(embed.FooterText) ? null : new { text = embed.FooterText, icon_url = embed.FooterIcon },
+                timestamp = embed.Timestamp?.ToString("o")
+            };
+
+            var payload = new
+            {
+                embeds = new[] { embedObj },
+                allowed_mentions = new { parse = new[] { "users", "roles", "everyone" } }
+            };
+
+            string json = JsonSerializer.Serialize(payload);
 
             using (HttpClient client = new HttpClient())
             {
                 HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
                 HttpResponseMessage response = await client.PostAsync(webhook, content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    Console.Clear();
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("\n\t\t\t\tEmbed message sent successfully!");
-                }
-                else
-                {
-                    Console.Clear();
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"\n\t\t\t\tFailed to send embed message. Status Code: {response.StatusCode}");
-                }
+                PrintSendResult(response, "Embed message");
             }
         }
+
 
         private static async Task SendBothMessages(string webhook, string message, EmbedMessage embed)
         {
             string colorHex = string.IsNullOrWhiteSpace(embed.Color) ? "3498db" :
-                  (embed.Color.StartsWith("#") ? embed.Color.Substring(1) : embed.Color);
+                (embed.Color.StartsWith("#") ? embed.Color.Substring(1) : embed.Color);
             int color = int.Parse(colorHex, System.Globalization.NumberStyles.HexNumber);
 
-            string json = $@"{{
-                ""content"": ""{message}"",
-                ""embeds"": [{{
-                    ""title"": ""{embed.Title}"",
-                    ""description"": ""{embed.Description}"",
-                    ""color"": {color},
-                    ""image"": {{""url"": ""{embed.ImageUrl ?? ""}""}},
-                    ""thumbnail"": {{""url"": ""{embed.ThumbnailUrl ?? ""}""}}
-                }}],
-                ""allowed_mentions"": {{
-                    ""parse"": [""users"", ""roles"", ""everyone""]
-                }}
-            }}";
+            var embedObj = new
+            {
+                title = embed.Title,
+                description = embed.Description,
+                color = color,
+                image = string.IsNullOrWhiteSpace(embed.ImageUrl) ? null : new { url = embed.ImageUrl },
+                thumbnail = string.IsNullOrWhiteSpace(embed.ThumbnailUrl) ? null : new { url = embed.ThumbnailUrl },
+                fields = embed.Fields.Any()
+                    ? embed.Fields.Select(f => new { name = f.Name, value = f.Value, inline = f.Inline }).ToArray()
+                    : null,
+                footer = string.IsNullOrWhiteSpace(embed.FooterText) ? null : new { text = embed.FooterText, icon_url = embed.FooterIcon },
+                timestamp = embed.Timestamp?.ToString("o")
+            };
+
+            var payload = new
+            {
+                content = message,
+                embeds = new[] { embedObj },
+                allowed_mentions = new { parse = new[] { "users", "roles", "everyone" } }
+            };
+
+            string json = JsonSerializer.Serialize(payload);
 
             using (HttpClient client = new HttpClient())
             {
                 HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
                 HttpResponseMessage response = await client.PostAsync(webhook, content);
+                PrintSendResult(response, "Both messages");
+            }
+        }
 
-                if (response.IsSuccessStatusCode)
-                {
-                    Console.Clear();
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("\n\t\t\t\tBoth messages sent successfully!");
-                }
-                else
-                {
-                    Console.Clear();
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"\n\t\t\t\tFailed to send messages. Status Code: {response.StatusCode}");
-                }
+
+        private static void PrintSendResult(HttpResponseMessage response, string type)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"\n\t\t\t\t{type} sent successfully!");
+            }
+            else
+            {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\n\t\t\t\tFailed to send {type}. Status Code: {response.StatusCode}");
             }
         }
     }
