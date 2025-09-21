@@ -109,7 +109,7 @@ namespace DiscordTools
                     }
                     catch
                     {
-                        
+                        // if failed, still use cache
                     }
 
                     Console.Clear();

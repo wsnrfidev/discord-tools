@@ -38,6 +38,10 @@ namespace DiscordTools
                 return;
             }
 
+            Console.Clear();
+            Console.WriteLine("\t\t\t\t===============================================");
+            Console.WriteLine("\t\t\t\t        Send Webhook Message");
+            Console.WriteLine("\t\t\t\t===============================================");
             Console.WriteLine("\n\t\t\t\t 1. Normal Message");
             Console.WriteLine("\n\t\t\t\t 2. Embed Message");
             Console.WriteLine("\n\t\t\t\t 3. Send Message with Embed");
@@ -357,7 +361,7 @@ namespace DiscordTools
             {
                 title = embed.Title,
                 description = embed.Description,
-                color = color,
+                c = color,
                 image = string.IsNullOrWhiteSpace(embed.ImageUrl) ? null : new { url = embed.ImageUrl },
                 thumbnail = string.IsNullOrWhiteSpace(embed.ThumbnailUrl) ? null : new { url = embed.ThumbnailUrl },
                 fields = embed.Fields.Any()
