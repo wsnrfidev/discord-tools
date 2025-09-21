@@ -27,8 +27,9 @@ namespace DiscordTools
             Console.WriteLine("\n\t\t\t                        5. Auto Add Role");
             Console.WriteLine("\n\t\t\t                        0. Exit");
             Console.WriteLine("\n\n                  |--------------------------------------------------------------- @wsnrfidev ---------|");
-            Console.Write("\n                  Press the number to choose your tool: ");
             Console.ResetColor();
+            Console.Write("\n                  Press the number to choose your tool: ");
+
         }
     }
 }
